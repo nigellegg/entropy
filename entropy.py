@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 import pickle
 
+
 def main():
-    datfile = 'train.csv'
+    datfile = 'TRAIN_data2.csv'
     df = pd.read_csv(datfile)
     y = df.columns
     df = df.fillna(value=0)
@@ -25,6 +26,7 @@ def main():
         # need to define the type of variable.
         if len(codelist) > 10:
             print 'recoding'
+            codelist = []
             max = df[x].max()
             min = df[x].min()
             med = df[x].median()
@@ -34,6 +36,7 @@ def main():
             while i < len(df):
                 df[x][i] = recode(df[x][i], m1, med, m2)
                 i += 1
+            df.to_csv('train2.csv')
             print df[x]
             codelist = GetCodelist(df, x)
         # entropy = - p1 log(p1) - p2 log(p2) - ...
@@ -59,7 +62,10 @@ def main():
         for y in codelist:
             ent = 0
             for a in target_codes:
-                ent = ent + ent_tab[(int(a)), y-1]
+                i = 0
+                while i < len(codelist):
+                    ent = ent + ent_tab[(int(a)), i]
+                    i += 1
             entropy[x] = ent
         print str(entropy)
     out = open('entlist.pkl', 'wb')
