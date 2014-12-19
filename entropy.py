@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
-
+import pickle
 
 def main():
-    datfile = 'TRAIN_data2.csv'
+    datfile = 'train.csv'
     df = pd.read_csv(datfile)
     y = df.columns
     df = df.fillna(value=0)
@@ -13,6 +13,7 @@ def main():
     entropy_list = []
     target_codes = []
     codelist = []
+    entropy = {}
     for x in y:
         print x
         if x == idvar:
@@ -44,14 +45,25 @@ def main():
             for y in codelist:
                 dy = dx[dx[x] == int(y)]
                 l = dy[x].count()
-                p = l/z
+                p = l/float(len(df))
+                print 'l = ', l
+                print 'len(df) = ', len(df)
+                print 'y = ', y
+                print 'p = ', p
                 plog = -(np.log(p))
+                print 'plog = ', plog
                 n = p*plog
-                ent_tab[(int(a)), (int(i)-1)] = n
+                print 'n = ', n
+                ent_tab[(int(a)), i-1] = n
                 i += 1
-        entropy_list.append(ent_tab)
-    out = open('entlist.txt', 'w')
-    out.write(str(entropy_list))
+        for y in codelist:
+            ent = 0
+            for a in target_codes:
+                ent = ent + ent_tab[(int(a)), y-1]
+            entropy[x] = ent
+        print str(entropy)
+    out = open('entlist.pkl', 'wb')
+    pickle.dump(entropy, out)
     out.close()
     print("All done")
 
@@ -74,10 +86,11 @@ def GetTarget(df, x):
     print 'Getting target'
     target_codes = []
     z = df.groupby(x).count()
-    s = z[x]
-    for y in s.index:
+    for y in z.index:
         target_codes.append(y)
     print str(target_codes)
+    out = open('target.pkl', 'wb')
+    pickle.dump(target_codes, out)
     return target_codes
 
 
@@ -85,13 +98,11 @@ def GetCodelist(df, x):
     print("Get code list")
     codes = []
     z = df.groupby(x).count()
-    s = z[x]
-    for y in s.index:
+    for y in z.index:
         codes.append(y)
     print str(codes)
-    out = open('codes_'+x+'.txt', 'w')
-    out.write(x)
-    out.write(str(codes))
+    out = open('codes_'+x+'.txt', 'wb')
+    pickle.dump(codes, out)
     out.close()
     return codes
 
