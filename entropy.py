@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 import pickle
 
+
 def main():
-    datfile = 'train.csv'
+    datfile = 'TRAIN_data2.csv'
     df = pd.read_csv(datfile)
     y = df.columns
     df = df.fillna(value=0)
