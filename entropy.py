@@ -20,48 +20,63 @@ def main():
             pass
         elif x == target:
             target_codes = GetTarget(df, x)
+            for a in target_codes:
+                dx[df[target] == int(a)]
+                l = len(dx)
+                p = l/float(len(df))
+        
         else:
             codelist = GetCodelist(df, x)
-        # need to define the type of variable.
-        if len(codelist) > 10:
-            print 'recoding'
-            max = df[x].max()
-            min = df[x].min()
-            med = df[x].median()
-            m1 = med/2
-            m2 = med + med/2
-            i = 0
-            while i < len(df):
-                df[x][i] = recode(df[x][i], m1, med, m2)
-                i += 1
-            print df[x]
-            codelist = GetCodelist(df, x)
-        # entropy = - p1 log(p1) - p2 log(p2) - ...
-        ent_tab = np.zeros((len(target_codes), len(codelist)))
-        z = len(df)
-        for a in target_codes:
-            dx = df[df[target] == int(a)]
-            i = 0
-            for y in codelist:
-                dy = dx[dx[x] == int(y)]
-                l = dy[x].count()
-                p = l/float(len(df))
-                print 'l = ', l
-                print 'len(df) = ', len(df)
-                print 'y = ', y
-                print 'p = ', p
-                plog = -(np.log(p))
-                print 'plog = ', plog
-                n = p*plog
-                print 'n = ', n
-                ent_tab[(int(a)), i-1] = n
-                i += 1
-        for y in codelist:
-            ent = 0
+            # need to define the type of variable.
+            if len(codelist) > 10:
+                print 'recoding'
+                max = df[x].max()
+                min = df[x].min()
+                med = df[x].median()
+                m1 = med/2
+                m2 = med + med/2
+                i = 0
+                while i < len(df):
+                    df[x][i] = recode(df[x][i], m1, med, m2)
+                    i += 1
+                print df[x]
+                codelist = GetCodelist(df, x)
+            # entropy = - p1 log(p1) - p2 log(p2) - ...
+            ent_tab = np.zeros((len(target_codes), len(codelist)))
+            z = len(df)
             for a in target_codes:
-                ent = ent + ent_tab[(int(a)), y-1]
-            entropy[x] = ent
-        print str(entropy)
+                dx = df[df[target] == int(a)]
+                i = 0
+                codes = {}
+                for y in codelist:
+                    dy = dx[dx[x] == int(y)]
+                    l = dy[x].count()
+                    p = l/float(len(df))
+                    print 'l = ', l
+                    print 'len(df) = ', len(df)
+                    print 'y = ', y
+                    print 'p = ', p
+                    codes[y] = p
+                    plog = -(np.log(p))
+                    print 'plog = ', plog
+                    n = p*plog
+                    print 'n = ', n
+                    ent_tab[(int(a)), i-1] = n
+                    i += 1
+                out = open('codes'+x+'.pkl', 'wb')
+                pickle.dump(codes, out)
+                out.close()
+            ents = []
+            for a in target_codes:
+                i = 0
+                ents = []
+                ent = 0
+                while i<len(codelist):
+                    ent = ent + ent_tab[(int(a)), i-1]
+                    i += 1
+                    ents.append(ent)
+            entropy[x] = ents
+            print str(entropy)
     out = open('entlist.pkl', 'wb')
     pickle.dump(entropy, out)
     out.close()
@@ -101,9 +116,6 @@ def GetCodelist(df, x):
     for y in z.index:
         codes.append(y)
     print str(codes)
-    out = open('codes_'+x+'.txt', 'wb')
-    pickle.dump(codes, out)
-    out.close()
     return codes
 
 
