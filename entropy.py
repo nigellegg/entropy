@@ -20,12 +20,17 @@ def main():
         if x == idvar:
             pass
         elif x == target:
+            target_ps = []
             target_codes = GetTarget(df, x)
             for a in target_codes:
                 dx[df[target] == int(a)]
                 l = len(dx)
                 p = l/float(len(df))
-        
+                plog = (np.log(p))
+                ent = p * plog
+                target_ps.append(ent)
+            output = open('parent_ents.pkl', 'wb')
+            pickle.dump(target_ps, output)
         else:
             codelist = GetCodelist(df, x)
             # need to define the type of variable.
